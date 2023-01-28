@@ -2,38 +2,33 @@ defmodule Genetic do
   @moduledoc """
   Documentation for `Genetic`.
   """
+  alias Problem
+  alias Types.Chromosome
 
   @doc """
   entry to run a genetic algorithm
-
-  ## Examples
-
-      iex> genotype = fn -> for _ <- 1..100, do: Enum.random(0..1) end
-      iex> fitness_function = fn chromosome -> Enum.sum(chromosome) end
-      iex> max_fitness = 100
-      iex> Genetic.run(fitness_function, genotype, max_fitness)
   """
-  def run(fitness_function, genotype, max_fitness, opts \\ []) do
-    population = initialize(genotype)
+  def run(problem, opts \\ []) do
+    population = initialize(&problem.genotype/0)
 
     population
-    |> evolve(fitness_function, genotype, max_fitness, opts)
+    |> evolve(problem, opts)
   end
 
   # improve
-  defp evolve(population, fitness_function, genotype, max_fitness, opts \\ []) do
-    population = evaluate(population, fitness_function, opts)
+  defp evolve(population, problem, opts \\ []) do
+    population = evaluate(population, &problem.fitness_function/1, opts)
     best = hd(population)
-    IO.write("\rCurrent Best: #{fitness_function.(best)}")
+    IO.write("\rCurrent Best: #{best.fitness}")
 
-    if fitness_function.(best) == max_fitness do
+    if problem.terminate?(population) do
       best
     else
       population
       |> select(opts)
       |> crossover(opts)
       |> mutation(opts)
-      |> evolve(fitness_function, genotype, max_fitness, opts)
+      |> evolve(problem, opts)
     end
   end
 
@@ -41,7 +36,10 @@ defmodule Genetic do
     sort_fn = Keyword.get(opts, :sort_fn, &>=/2)
 
     population
-    |> Enum.sort_by(fitness_function, sort_fn)
+    |> Enum.map(fn chromosome ->
+      %Chromosome{chromosome | fitness: fitness_function.(chromosome), age: chromosome.age + 1}
+    end)
+    |> Enum.sort_by(& &1.fitness, sort_fn)
   end
 
   defp select(population, opts \\ []) do
@@ -55,9 +53,12 @@ defmodule Genetic do
     |> Enum.reduce(
       [],
       fn {p1, p2}, acc ->
-        cx_point = :rand.uniform(length(p1))
-        {{h1, t1}, {h2, t2}} = {Enum.split(p1, cx_point), Enum.split(p2, cx_point)}
-        [h1 ++ t2, h2 ++ t1 | acc]
+        cx_point = :rand.uniform(length(p1.genes))
+        {h1, t1} = Enum.split(p1.genes, cx_point)
+        {h2, t2} = Enum.split(p2.genes, cx_point)
+        c1 = %Chromosome{p1 | genes: h1 ++ t2}
+        c2 = %Chromosome{p2 | genes: h2 ++ t1}
+        [c1, c2 | acc]
       end
     )
   end
@@ -68,7 +69,7 @@ defmodule Genetic do
     population
     |> Enum.map(fn chromosome ->
       if :rand.uniform() < drop_possibility do
-        Enum.shuffle(chromosome)
+        %Chromosome{chromosome | genes: Enum.shuffle(chromosome.genes)}
       else
         chromosome
       end
