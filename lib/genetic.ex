@@ -25,6 +25,7 @@ defmodule Genetic do
     population = evaluate(population, fitness_function, opts)
     best = hd(population)
     IO.write("\rCurrent Best: #{fitness_function.(best)}")
+
     if fitness_function.(best) == max_fitness do
       best
     else
@@ -38,6 +39,7 @@ defmodule Genetic do
 
   defp evaluate(population, fitness_function, opts \\ []) do
     sort_fn = Keyword.get(opts, :sort_fn, &>=/2)
+
     population
     |> Enum.sort_by(fitness_function, sort_fn)
   end
@@ -62,6 +64,7 @@ defmodule Genetic do
 
   defp mutation(population, opts \\ []) do
     drop_possibility = Keyword.get(opts, :drop_possibility, 0.05)
+
     population
     |> Enum.map(fn chromosome ->
       if :rand.uniform() < drop_possibility do
