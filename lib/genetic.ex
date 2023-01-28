@@ -8,9 +8,9 @@ defmodule Genetic do
 
   ## Examples
 
-      iex> genotype = fn -> for _ <- 1..1000, do: Enum.random(0..1) end
+      iex> genotype = fn -> for _ <- 1..100, do: Enum.random(0..1) end
       iex> fitness_function = fn chromosome -> Enum.sum(chromosome) end
-      iex> max_fitness = 1000
+      iex> max_fitness = 100
       iex> Genetic.run(fitness_function, genotype, max_fitness)
   """
   def run(fitness_function, genotype, max_fitness, opts \\ []) do
