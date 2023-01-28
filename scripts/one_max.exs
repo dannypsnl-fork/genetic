@@ -14,7 +14,7 @@ defmodule OneMax do
   end
 
   @impl Problem
-  def terminate?([best | _]) do
+  def terminate?([best | _], generation) do
     best.fitness == 1000
   end
 end

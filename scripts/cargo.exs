@@ -15,7 +15,7 @@ defmodule Cargo do
     # use a binary string to represent 10 product
     # 1010001100 means picking product A, C, G, H
     genes = for _ <- 1..10 , do: Enum.random(0..1)
-    %Chromosome {genes: genes, size: 10 }
+    %Chromosome{genes: genes, size: 10}
   end
 
   @impl Problem
@@ -41,8 +41,8 @@ defmodule Cargo do
   end
 
   @impl Problem
-  def terminate?(population) do
-    Enum.max_by(population, &Cargo.fitness_function/1).fitness >= 39
+  def terminate?(population, generation) do
+    Enum.max_by(population, &Cargo.fitness_function/1).fitness >= 40 or generation == 10000
   end
 end
 
