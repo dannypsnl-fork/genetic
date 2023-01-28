@@ -37,8 +37,9 @@ defmodule Genetic do
   end
 
   defp evaluate(population, fitness_function, opts \\ []) do
+    sort_fn = Keyword.get(opts, :sort_fn, &>=/2)
     population
-    |> Enum.sort_by(fitness_function, &>=/2)
+    |> Enum.sort_by(fitness_function, sort_fn)
   end
 
   defp select(population, opts \\ []) do
