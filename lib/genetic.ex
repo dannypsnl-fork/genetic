@@ -8,6 +8,7 @@ defmodule Genetic do
   @doc """
   entry to run a genetic algorithm
   """
+  @spec run(Problem.t()) :: Chromosome.t()
   def run(problem, opts \\ []) do
     population = initialize(&problem.genotype/0)
 
