@@ -21,7 +21,7 @@ defmodule Genetic do
   end
 
   # improve
-  def evolve(population, fitness_function, genotype, max_fitness, opts \\ []) do
+  defp evolve(population, fitness_function, genotype, max_fitness, opts \\ []) do
     population = evaluate(population, fitness_function, opts)
     best = hd(population)
     IO.write("\rCurrent Best: #{fitness_function.(best)}")
@@ -36,18 +36,18 @@ defmodule Genetic do
     end
   end
 
-  def evaluate(population, fitness_function, opts \\ []) do
+  defp evaluate(population, fitness_function, opts \\ []) do
     population
     |> Enum.sort_by(fitness_function, &>=/2)
   end
 
-  def select(population, opts \\ []) do
+  defp select(population, opts \\ []) do
     population
     |> Enum.chunk_every(2)
     |> Enum.map(&List.to_tuple(&1))
   end
 
-  def crossover(population, opts \\ []) do
+  defp crossover(population, opts \\ []) do
     population
     |> Enum.reduce(
       [],
@@ -59,10 +59,11 @@ defmodule Genetic do
     )
   end
 
-  def mutation(population, opts \\ []) do
+  defp mutation(population, opts \\ []) do
+    drop_possibility = Keyword.get(opts, :drop_possibility, 0.05)
     population
     |> Enum.map(fn chromosome ->
-      if :rand.uniform() < 0.05 do
+      if :rand.uniform() < drop_possibility do
         Enum.shuffle(chromosome)
       else
         chromosome
@@ -70,7 +71,7 @@ defmodule Genetic do
     end)
   end
 
-  def initialize(genotype, opts \\ []) do
+  defp initialize(genotype, opts \\ []) do
     population_size = Keyword.get(opts, :population_size, 100)
     for _ <- 1..population_size, do: genotype.()
   end
