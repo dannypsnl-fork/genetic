@@ -8,18 +8,21 @@ defmodule Genetic do
 
   ## Examples
 
+      iex> genotype = fn -> for _ <- 1..1000, do: Enum.random(0..1) end
+      iex> fitness_function = fn chromosome -> Enum.sum(chromosome) end
+      iex> max_fitness = 1000
       iex> Genetic.run(fitness_function, genotype, max_fitness)
   """
-  def run(fitness_function, genotype, max_fitness) do
+  def run(fitness_function, genotype, max_fitness, opts \\ []) do
     population = initialize(genotype)
 
     population
-    |> evolve(population, fitness_function, genotype, max_fitness)
+    |> evolve(fitness_function, genotype, max_fitness, opts)
   end
 
   # improve
-  def evolve(population, fitness_function, genotype, max_fitness) do
-    population = evaluate(population, fitness_function)
+  def evolve(population, fitness_function, genotype, max_fitness, opts \\ []) do
+    population = evaluate(population, fitness_function, opts)
     best = hd(population)
     IO.write("\rCurrent Best: ...")
 
@@ -27,25 +30,25 @@ defmodule Genetic do
       best
     else
       population
-      |> select()
-      |> crossover()
-      |> mutation()
-      |> evolve()
+      |> select(opts)
+      |> crossover(opts)
+      |> mutation(opts)
+      |> evolve(fitness_function, genotype, max_fitness, opts)
     end
   end
 
-  def evaluate(population, fitness_function) do
+  def evaluate(population, fitness_function, opts \\ []) do
     population
     |> Enum.sort_by(fitness_function, &>=/2)
   end
 
-  def select(population) do
+  def select(population, opts \\ []) do
     population
     |> Enum.chunk_every(2)
     |> Enum.map(&List.to_tuple(&1))
   end
 
-  def crossover(population) do
+  def crossover(population, opts \\ []) do
     population
     |> Enum.reduce(
       [],
@@ -57,7 +60,7 @@ defmodule Genetic do
     )
   end
 
-  def mutation(population) do
+  def mutation(population, opts \\ []) do
     population
     |> Enum.map(fn chromosome ->
       if :rand.uniform() < 0.05 do
@@ -68,7 +71,8 @@ defmodule Genetic do
     end)
   end
 
-  def initialize(genotype) do
-    for _ <- 1..100, do: genotype.()
+  def initialize(genotype, opts \\ []) do
+    population_size = Keyword.get(opts, :population_size, 100)
+    for _ <- 1..population_size, do: genotype.()
   end
 end

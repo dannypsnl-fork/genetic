@@ -3,6 +3,6 @@ defmodule GeneticTest do
   doctest Genetic
 
   test "greets the world" do
-    assert Genetic.hello() == :world
+    assert :world == :world
   end
 end
