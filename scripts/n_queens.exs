@@ -39,6 +39,7 @@ defmodule NQueens do
   end
 end
 
+# 採用 uniform 遠比 single point 更快收斂
 soln = Genetic.run(NQueens, crossover_type: &Toolbox.Crossover.uniform(&1, &2, 0.5))
 IO.write("\n")
 IO.inspect(soln)

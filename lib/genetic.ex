@@ -21,6 +21,8 @@ defmodule Genetic do
     population = evaluate(population, &problem.fitness_function/1, opts)
     best = hd(population)
     cooling_rate = Keyword.get(opts, :cooling_rate, 0.2)
+
+    # 冷卻計算的概念是要是變化率慢慢減少，就可以用來判斷是否要停止演算法
     temperature = (1 - cooling_rate) * (temperature + (best.fitness - last_max_fitness))
     IO.write("\rCurrent Best: #{best.fitness}")
 
@@ -69,7 +71,7 @@ defmodule Genetic do
   end
 
   defp crossover(population, opts) do
-    crossover_fn = Keyword.get(opts, :crossover_type, &Toolbox.Crossover.order_one/2)
+    crossover_fn = Keyword.get(opts, :crossover_type, &Toolbox.Crossover.single_point/2)
 
     population
     |> Enum.reduce(
