@@ -68,16 +68,14 @@ defmodule Genetic do
     {parents, MapSet.to_list(leftover)}
   end
 
-  defp crossover(population, _opts) do
+  defp crossover(population, opts) do
+    crossover_fn = Keyword.get(opts, :crossover_type, &Toolbox.Crossover.order_one/2)
+
     population
     |> Enum.reduce(
       [],
       fn {p1, p2}, acc ->
-        cx_point = :rand.uniform(length(p1.genes))
-        {h1, t1} = Enum.split(p1.genes, cx_point)
-        {h2, t2} = Enum.split(p2.genes, cx_point)
-        c1 = %Chromosome{p1 | genes: h1 ++ t2}
-        c2 = %Chromosome{p2 | genes: h2 ++ t1}
+        {c1, c2} = apply(crossover_fn, [p1, p2])
         [c1, c2 | acc]
       end
     )
