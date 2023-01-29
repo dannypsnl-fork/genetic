@@ -19,7 +19,7 @@ defmodule Genetic do
   # improve
   defp evolve(population, problem, generation, last_max_fitness, temperature, opts) do
     population = evaluate(population, &problem.fitness_function/1, opts)
-    best = Enum.max_by(population, &problem.fitness_function/1)
+    best = hd(population)
     cooling_rate = Keyword.get(opts, :cooling_rate, 0.2)
     temperature = (1 - cooling_rate) * (temperature + (best.fitness - last_max_fitness))
     IO.write("\rCurrent Best: #{best.fitness}")
@@ -27,9 +27,10 @@ defmodule Genetic do
     if problem.terminate?(population, generation, temperature) do
       best
     else
-      population
-      |> select(opts)
-      |> crossover(opts)
+      {parents, leftover} = select(population, opts)
+      children = crossover(parents, opts)
+
+      (children ++ leftover)
       |> mutation(opts)
       |> evolve(problem, generation + 1, best.fitness, temperature, opts)
     end
@@ -45,10 +46,26 @@ defmodule Genetic do
     |> Enum.sort_by(& &1.fitness, sort_fn)
   end
 
-  defp select(population, _opts) do
-    population
-    |> Enum.chunk_every(2)
-    |> Enum.map(&List.to_tuple(&1))
+  defp select(population, opts) do
+    select_fn = Keyword.get(opts, :selection_type, &Toolbox.Selection.elite/2)
+    select_rate = Keyword.get(opts, :selection_rate, 0.8)
+
+    n = round(length(population) * select_rate)
+    n = if rem(n, 2) == 0, do: n, else: n + 1
+
+    parents = select_fn |> apply([population, n])
+
+    leftover =
+      population
+      |> MapSet.new()
+      |> MapSet.difference(MapSet.new(parents))
+
+    parents =
+      parents
+      |> Enum.chunk_every(2)
+      |> Enum.map(&List.to_tuple(&1))
+
+    {parents, MapSet.to_list(leftover)}
   end
 
   defp crossover(population, _opts) do

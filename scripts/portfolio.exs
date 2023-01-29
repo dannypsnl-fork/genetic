@@ -24,6 +24,6 @@ defmodule Portfolio do
   end
 end
 
-soln = Genetic.run(Portfolio)
+soln = Genetic.run(Portfolio, selection_type: &Toolbox.Selection.roulette/2)
 IO.write("\n")
 IO.inspect(soln)
