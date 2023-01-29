@@ -17,7 +17,7 @@ defmodule Genetic do
   end
 
   # improve
-  defp evolve(population, problem, generation, last_max_fitness, temperature, opts \\ []) do
+  defp evolve(population, problem, generation, last_max_fitness, temperature, opts) do
     population = evaluate(population, &problem.fitness_function/1, opts)
     best = Enum.max_by(population, &problem.fitness_function/1)
     cooling_rate = Keyword.get(opts, :cooling_rate, 0.2)
@@ -35,7 +35,7 @@ defmodule Genetic do
     end
   end
 
-  defp evaluate(population, fitness_function, opts \\ []) do
+  defp evaluate(population, fitness_function, opts) do
     sort_fn = Keyword.get(opts, :sort_fn, &>=/2)
 
     population
@@ -45,13 +45,13 @@ defmodule Genetic do
     |> Enum.sort_by(& &1.fitness, sort_fn)
   end
 
-  defp select(population, opts \\ []) do
+  defp select(population, _opts) do
     population
     |> Enum.chunk_every(2)
     |> Enum.map(&List.to_tuple(&1))
   end
 
-  defp crossover(population, opts \\ []) do
+  defp crossover(population, _opts) do
     population
     |> Enum.reduce(
       [],
@@ -66,7 +66,7 @@ defmodule Genetic do
     )
   end
 
-  defp mutation(population, opts \\ []) do
+  defp mutation(population, opts) do
     population
     |> Enum.map(fn chromosome ->
       if :rand.uniform() < Keyword.get(opts, :drop_possibility, 0.05) do
