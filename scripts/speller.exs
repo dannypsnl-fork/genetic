@@ -22,6 +22,6 @@ defmodule Speller do
   end
 end
 
-soln = Genetic.run(Speller)
+soln = Genetic.run(Speller, crossover_type: &Toolbox.Crossover.single_point/2)
 IO.write("\n")
 IO.inspect(soln)

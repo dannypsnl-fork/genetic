@@ -20,6 +20,6 @@ defmodule OneMax do
   end
 end
 
-soln = Genetic.run(OneMax)
+soln = Genetic.run(OneMax, crossover_type: &Toolbox.Crossover.single_point/2)
 IO.write("\n")
 IO.inspect(soln)
