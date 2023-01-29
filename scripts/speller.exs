@@ -16,7 +16,8 @@ defmodule Speller do
     String.jaro_distance(target, guess)
   end
 
-  def terminate?([best | _], generation, _temperature) do
+  def terminate?(population, generation, _temperature) do
+    best = Enum.max_by(population, &fitness_function/1)
     best.fitness >= 1 or generation == 10000
   end
 end
