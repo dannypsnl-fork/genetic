@@ -48,4 +48,19 @@ defmodule Toolbox.Crossover do
 
     {%Chromosome{genes: c1, size: length(c1)}, %Chromosome{genes: c2, size: length(c2)}}
   end
+
+  def whole_arithmetic(p1, p2, alpha) do
+    {c1, c2} =
+      p1.genes
+      |> Enum.zip(p2.genes)
+      |> Enum.map(fn {x, y} ->
+        {
+          x * alpha + y * (1 - alpha),
+          x * (1 - alpha) + y * alpha
+        }
+      end)
+      |> Enum.unzip()
+
+    {%Chromosome{genes: c1, size: length(c1)}, %Chromosome{genes: c2, size: length(c2)}}
+  end
 end
