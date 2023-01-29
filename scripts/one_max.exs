@@ -14,7 +14,8 @@ defmodule OneMax do
   end
 
   @impl Problem
-  def terminate?([best | _], generation) do
+  def terminate?(population, _generation, _temperature) do
+    best = Enum.max_by(population, &fitness_function/1)
     best.fitness == 1000
   end
 end

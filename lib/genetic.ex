@@ -13,25 +13,25 @@ defmodule Genetic do
     population = initialize(&problem.genotype/0)
 
     population
-    |> evolve(problem, 0, opts)
+    |> evolve(problem, 0, 0, 0, opts)
   end
 
   # improve
-  defp evolve(population, problem, generation, opts \\ []) do
+  defp evolve(population, problem, generation, last_max_fitness, temperature, opts \\ []) do
     population = evaluate(population, &problem.fitness_function/1, opts)
-    best = hd(population)
+    best = Enum.max_by(population, &problem.fitness_function/1)
+    cooling_rate = Keyword.get(opts, :cooling_rate, 0.2)
+    temperature = (1 - cooling_rate) * (temperature + (best.fitness - last_max_fitness))
     IO.write("\rCurrent Best: #{best.fitness}")
 
-    if problem.terminate?(population, generation) do
+    if problem.terminate?(population, generation, temperature) do
       best
     else
-      generation = generation + 1
-
       population
       |> select(opts)
       |> crossover(opts)
       |> mutation(opts)
-      |> evolve(problem, generation, opts)
+      |> evolve(problem, generation + 1, best.fitness, temperature, opts)
     end
   end
 
@@ -67,11 +67,9 @@ defmodule Genetic do
   end
 
   defp mutation(population, opts \\ []) do
-    drop_possibility = Keyword.get(opts, :drop_possibility, 0.05)
-
     population
     |> Enum.map(fn chromosome ->
-      if :rand.uniform() < drop_possibility do
+      if :rand.uniform() < Keyword.get(opts, :drop_possibility, 0.05) do
         %Chromosome{chromosome | genes: Enum.shuffle(chromosome.genes)}
       else
         chromosome
