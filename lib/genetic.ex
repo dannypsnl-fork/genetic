@@ -26,18 +26,30 @@ defmodule Genetic do
       (1 - Keyword.get(opts, :cooling_rate, 0.2)) *
         (temperature + abs(best.fitness - last_max_fitness))
 
-    IO.write("\rCurrent Best: #{best.fitness}")
+    fit_str =
+      if is_float(best.fitness) do
+        :erlang.float_to_binary(best.fitness, decimals: 4)
+      else
+        best.fitness
+      end
+
+    IO.write("\rCurrent Best: #{fit_str}\tGeneration: #{generation}")
 
     if problem.terminate?(population, generation, temperature) do
       best
     else
       {parents, leftover} = select(population, opts)
       children = crossover(parents, opts)
-
-      (children ++ leftover)
-      |> mutation(opts)
-      |> evolve(problem, generation + 1, best.fitness, temperature, opts)
+      mutants = mutation(population, opts)
+      offspring = children ++ mutants
+      new_population = reinsertion(parents, offspring, leftover, opts)
+      evolve(new_population, problem, generation + 1, best.fitness, temperature, opts)
     end
+  end
+
+  defp reinsertion(parents, offspring, leftover, opts) do
+    strategy = Keyword.get(opts, :reinsertion_strategy, &Toolbox.Reinsertion.pure/3)
+    apply(strategy, [parents, offspring, leftover])
   end
 
   defp evaluate(population, fitness_function, opts) do
@@ -88,17 +100,12 @@ defmodule Genetic do
   defp mutation(population, opts) do
     mutation_fn = Keyword.get(opts, :mutation_type, &Toolbox.Mutation.flip/1)
     rate = Keyword.get(opts, :mutation_rate, 0.05)
+    # 選出一定比例的 chromosome 去修改，用 floor 確保這個 n 是整數
+    n = floor(length(population) * rate)
 
     population
-    |> Enum.map(fn chromosome ->
-      # The point of mutation is that, we have a little but existed chance, to change the population
-      # ensuring, we are not stick on a certain selection & crossover
-      if :rand.uniform() < rate do
-        apply(mutation_fn, [chromosome])
-      else
-        chromosome
-      end
-    end)
+    |> Enum.take_random(n)
+    |> Enum.map(&apply(mutation_fn, [&1]))
   end
 
   defp initialize(genotype, opts \\ []) do

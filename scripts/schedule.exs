@@ -37,7 +37,7 @@ defmodule Schedule do
   end
 
   def terminate?(_, generation, _) do
-    generation == 10000
+    generation == 100000
   end
 end
 
