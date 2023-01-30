@@ -20,10 +20,12 @@ defmodule Genetic do
   defp evolve(population, problem, generation, last_max_fitness, temperature, opts) do
     population = evaluate(population, &problem.fitness_function/1, opts)
     best = hd(population)
-    cooling_rate = Keyword.get(opts, :cooling_rate, 0.2)
 
     # 冷卻計算的概念是要是變化率慢慢減少，就可以用來判斷是否要停止演算法
-    temperature = (1 - cooling_rate) * (temperature + (best.fitness - last_max_fitness))
+    temperature =
+      (1 - Keyword.get(opts, :cooling_rate, 0.2)) *
+        (temperature + (best.fitness - last_max_fitness))
+
     IO.write("\rCurrent Best: #{best.fitness}")
 
     if problem.terminate?(population, generation, temperature) do
