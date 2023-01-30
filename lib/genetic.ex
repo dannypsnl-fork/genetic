@@ -86,10 +86,13 @@ defmodule Genetic do
   end
 
   defp mutation(population, opts) do
+    mutation_fn = Keyword.get(opts, :mutation_type, &Toolbox.Mutation.flip/1)
+    rate = Keyword.get(opts, :mutation_rate, 0.05)
+
     population
     |> Enum.map(fn chromosome ->
-      if :rand.uniform() < Keyword.get(opts, :drop_possibility, 0.05) do
-        %Chromosome{chromosome | genes: Enum.shuffle(chromosome.genes)}
+      if :rand.uniform() < rate do
+        apply(mutation_fn, [chromosome])
       else
         chromosome
       end
