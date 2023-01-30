@@ -31,7 +31,11 @@ defmodule Codebreaker do
   end
 end
 
-soln = Genetic.run(Codebreaker, crossover_type: &Toolbox.Crossover.single_point/2)
+soln =
+  Genetic.run(Codebreaker,
+    crossover_type: &Toolbox.Crossover.single_point/2,
+    mutation_type: &Toolbox.Mutation.scramble/1
+  )
 
 {key, _} =
   soln.genes

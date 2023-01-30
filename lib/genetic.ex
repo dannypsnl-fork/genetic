@@ -91,6 +91,8 @@ defmodule Genetic do
 
     population
     |> Enum.map(fn chromosome ->
+      # The point of mutation is that, we have a little but existed chance, to change the population
+      # ensuring, we are not stick on a certain selection & crossover
       if :rand.uniform() < rate do
         apply(mutation_fn, [chromosome])
       else
