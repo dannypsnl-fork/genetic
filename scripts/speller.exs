@@ -18,10 +18,16 @@ defmodule Speller do
 
   def terminate?(population, generation, _temperature) do
     best = Enum.max_by(population, &fitness_function/1)
-    best.fitness >= 1 or generation == 10000
+    best.fitness >= 0.8 or generation == 100_000
   end
 end
 
-soln = Genetic.run(Speller, crossover_type: &Toolbox.Crossover.single_point/2)
+soln =
+  Genetic.run(Speller,
+    selection_type: &Toolbox.Selection.elite/2,
+    crossover_type: &Toolbox.Crossover.single_point/2,
+    mutation_type: &Toolbox.Mutation.scramble/1
+  )
+
 IO.write("\n")
 IO.inspect(soln)

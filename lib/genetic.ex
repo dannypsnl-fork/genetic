@@ -24,7 +24,7 @@ defmodule Genetic do
     # 冷卻計算的概念是要是變化率慢慢減少，就可以用來判斷是否要停止演算法
     temperature =
       (1 - Keyword.get(opts, :cooling_rate, 0.2)) *
-        (temperature + (best.fitness - last_max_fitness))
+        (temperature + abs(best.fitness - last_max_fitness))
 
     IO.write("\rCurrent Best: #{best.fitness}")
 
