@@ -14,7 +14,7 @@ defmodule Cargo do
   def genotype() do
     # use a binary string to represent 10 product
     # 1010001100 means picking product A, C, G, H
-    genes = for _ <- 1..10 , do: Enum.random(0..1)
+    genes = for _ <- 1..10, do: Enum.random(0..1)
     %Chromosome{genes: genes, size: 10}
   end
 
@@ -29,6 +29,7 @@ defmodule Cargo do
       |> Enum.zip(profits)
       |> Enum.map(fn {g, profit} -> profit * g end)
       |> Enum.sum()
+
     over_limit? =
       chromosome.genes
       |> Enum.zip(weights)
@@ -50,8 +51,10 @@ soln = Genetic.run(Cargo)
 IO.write("\n")
 IO.inspect(soln)
 
-weight = soln.genes
+weight =
+  soln.genes
   |> Enum.zip([10, 6, 8, 7, 10, 9, 7, 11, 6, 8])
   |> Enum.map(fn {g, weight} -> weight * g end)
   |> Enum.sum()
+
 IO.write("\nWeight is: #{weight}")
