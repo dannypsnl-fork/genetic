@@ -37,10 +37,18 @@ defmodule Schedule do
   end
 
   def terminate?(_, generation, _) do
-    generation == 100000
+    generation == 10000
   end
 end
 
-soln = Genetic.run(Schedule)
+soln =
+  Genetic.run(
+    Schedule,
+    reinsertion_type: &Toolbox.Reinsertion.elitist(&1, &2, &3, 0.1),
+    selection_rate: 0.8,
+    mutation_rate: 0.1
+    # invariant: selection_rate + mutation_rate + survival_rate = 1.0
+  )
+
 IO.write("\n")
 IO.inspect(soln)
